@@ -53,10 +53,10 @@ export default function App() {
       const globalIndex = tracks.findIndex(x => x.key === t.key);
       setCurrentIndex(globalIndex === -1 ? null : globalIndex);
 
-      const res = await fetch(`/api/get-audio?key=${encodeURIComponent(t.key)}`);
-      const { url } = await res.json();
+      // Use /api/get-audio endpoint directly as the audio source (it streams audio with Range support)
+      const audioUrl = `/api/get-audio?key=${encodeURIComponent(t.key)}`;
       if (audioRef.current) {
-        audioRef.current.src = url;
+        audioRef.current.src = audioUrl;
         await audioRef.current.play();
         setIsPlaying(true);
       }
