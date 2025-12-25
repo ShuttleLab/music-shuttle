@@ -49,14 +49,16 @@ export default function App() {
     const t = filtered[index];
     if (!t) return;
     try {
+      // set current index immediately for UI responsiveness
+      const globalIndex = tracks.findIndex(x => x.key === t.key);
+      setCurrentIndex(globalIndex === -1 ? null : globalIndex);
+
       const res = await fetch(`/api/get-audio?key=${encodeURIComponent(t.key)}`);
       const { url } = await res.json();
       if (audioRef.current) {
         audioRef.current.src = url;
         await audioRef.current.play();
         setIsPlaying(true);
-        const globalIndex = tracks.findIndex(x => x.key === t.key);
-        setCurrentIndex(globalIndex === -1 ? null : globalIndex);
       }
     } catch (err) {
       console.error('play failed', err);
@@ -75,21 +77,28 @@ export default function App() {
   }
 
   function pickNext() {
-    if (tracks.length === 0) return;
+    console.log('pickNext called, tracks:', tracks.length, 'randomMode:', randomMode, 'filtered:', filtered.length);
+    if (tracks.length === 0) {
+      console.log('No tracks available');
+      return;
+    }
     if (randomMode) {
       const idx = Math.floor(Math.random() * tracks.length);
       const t = tracks[idx];
+      console.log('Random mode: picked track index', idx, 'key:', t.key);
       const filteredIndex = filtered.findIndex(f => f.key === t.key);
       if (filteredIndex >= 0) playAt(filteredIndex);
       else playAt(0);
       return;
     }
     if (currentIndex === null) {
+      console.log('Current index is null, playing first track');
       playAt(0);
       return;
     }
     const next = (currentIndex + 1) % tracks.length;
     const filteredIndex = filtered.findIndex(f => f.key === tracks[next].key);
+    console.log('Sequential mode: next index in filtered:', filteredIndex);
     if (filteredIndex >= 0) playAt(filteredIndex);
   }
 
@@ -101,16 +110,19 @@ export default function App() {
           <ListMusic className="w-10 h-10" />
           <h1 className="text-2xl font-bold">音乐播放器</h1>
           <div className="ml-auto flex items-center gap-2">
-            <button onClick={() => setRandomMode(r => !r)} className={`p-2 rounded-lg ${randomMode ? 'bg-emerald-500' : 'bg-white/10'}`} aria-label="随机播放">
-              <Shuffle className="w-5 h-5" />
+            <button onClick={() => {
+              setRandomMode(r => !r);
+              pickNext();
+            }} className={`p-3 rounded-xl ${randomMode ? 'bg-emerald-500' : 'bg-white/10'}`} aria-label="随机播放">
+              <Shuffle className="w-20 h-6" />
             </button>
           </div>
         </header>
 
         <div className="mb-4">
           <div className="relative">
-            <Search className="absolute left-3 top-3 w-5 h-5 text-white/60" />
-            <input value={filter} onChange={e => setFilter(e.target.value)} placeholder="搜索音乐名" className="w-full pl-10 pr-3 py-3 rounded-lg bg-white/6 placeholder-white/60" />
+            <Search className="absolute left-3 top-3 w-6 h-6 text-white/60" />
+            <input value={filter} onChange={e => setFilter(e.target.value)} placeholder="搜索音乐名" className="w-full pl-12 pr-3 py-4 text-lg rounded-lg bg-white/6 placeholder-white/60" />
           </div>
         </div>
 
@@ -122,16 +134,12 @@ export default function App() {
           ) : (
             <ul className="space-y-2">
               {filtered.map((t, i) => (
-                <li key={t.key} className="flex items-center justify-between p-3 rounded-md hover:bg-white/6">
+                <li key={t.key} onClick={() => playAt(i)} className="flex items-center justify-between p-3 rounded-md hover:bg-white/6 cursor-pointer">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-white/6 rounded-md flex items-center justify-center">🎵</div>
                     <div>
                       <div className="font-semibold text-sm">{shortName(t.key)}</div>
-                      <div className="text-xs text-white/60">{t.size ? `${Math.round((t.size||0)/1024)} KB` : ''}</div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button onClick={() => playAt(i)} className="px-3 py-2 bg-emerald-500 rounded-md">播放</button>
                   </div>
                 </li>
               ))}
