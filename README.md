@@ -1,4 +1,4 @@
-# File Shuttle (文件穿梭机)
+# Music Shuttle (音乐穿梭机)
 
 A serverless file transfer application powered by Cloudflare Pages, R2, and KV.
 
