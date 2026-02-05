@@ -1,0 +1,15 @@
+name = "music-shuttle"
+compatibility_date = "2024-12-19"
+compatibility_flags = ["nodejs_compat"]
+
+# Cloudflare Pages 输出目录（next-on-pages / OpenNext 会生成）
+# 必须明确指定 pages_build_output_dir 为 next-on-pages 的输出目录
+pages_build_output_dir = "./.vercel/output/static"
+
+# Pages 只支持 preview / production 环境，如需配置请在仪表盘设置
+# 此处移除自定义 env（development）以通过校验
+
+# R2 存储桶绑定
+[[r2_buckets]]
+binding = "R2_BUCKET"
+bucket_name = "music-shuttle"

@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 暗色模式背景 */
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.6%;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background: 215 28% 17%;
+      --foreground: 0 0% 95%;
+    }
+  }
+
+  body {
+    @apply bg-gradient-to-b from-slate-900 to-slate-800 text-white;
+    min-height: 100vh;
+  }
+}

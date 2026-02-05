@@ -1,0 +1,36 @@
+{
+  "name": "music-shuttle",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "dev:wrangler": "wrangler pages dev .vercel/output/static --compatibility-date=2024-12-19 --r2 R2_BUCKET=music-shuttle",
+    "build": "next build",
+    "pages:build": "npx @cloudflare/next-on-pages@1",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^3.4.0",
+    "lucide-react": "^0.562.0",
+    "next": "^15.1.6",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-hook-form": "^7.52.2",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@cloudflare/next-on-pages": "^1.13.16",
+    "@tailwindcss/forms": "^0.5.9",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.5",
+    "@types/react-dom": "^19.2.3",
+    "autoprefixer": "^10.4.23",
+    "eslint": "^9.39.1",
+    "eslint-config-next": "^15.1.6",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.3",
+    "typescript": "~5.9.3",
+    "wrangler": "^4.58.0"
+  }
+}
