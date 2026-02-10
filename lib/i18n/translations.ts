@@ -60,6 +60,9 @@ export const messages = {
         copiedHint: '已复制链接',
         paymentModalTitle: '请支持我',
         paymentModalClose: '关闭',
+        alipay: '支付宝',
+        paypal: 'PayPal',
+        wechat: '微信',
       },
       contact: {
         title: '联系方式',
@@ -137,6 +140,9 @@ export const messages = {
         copiedHint: 'Link copied',
         paymentModalTitle: 'Support',
         paymentModalClose: 'Close',
+        alipay: 'Alipay',
+        paypal: 'PayPal',
+        wechat: 'WeChat',
       },
       contact: {
         title: 'Contact',

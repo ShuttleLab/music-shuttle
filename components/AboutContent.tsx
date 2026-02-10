@@ -5,6 +5,19 @@ import { Heart, Share2 } from 'lucide-react'
 import { useI18n } from '@/lib/i18n'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
+
+const PAYMENT_QR = [
+  { key: 'alipay', src: '/alipay-qr.png' },
+  { key: 'paypal', src: '/paypal-qr.png' },
+  { key: 'wechat', src: '/wechat-qr.png' },
+] as const
 
 const SECURITY_KEYS = [
   'local',
@@ -25,7 +38,12 @@ const CHART_CLASSES = [
 export function AboutContent() {
   const { t } = useI18n()
   const [showCopiedHint, setShowCopiedHint] = useState(false)
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const handleSupport = () => {
+    setShowPaymentModal(true)
+  }
 
   const showCopiedToast = useCallback(() => {
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current)
@@ -126,16 +144,10 @@ export function AboutContent() {
               variant="secondary"
               size="lg"
               className="bg-background font-semibold text-foreground transition-transform duration-200 hover:scale-105 hover:bg-muted hover:shadow-lg active:scale-100"
-              asChild
+              onClick={handleSupport}
             >
-              <a
-                href="https://github.com/ShuttleLab/music-shuttle"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Heart className="size-5" />
-                {t('about.support.supportBtn')}
-              </a>
+              <Heart className="size-5" />
+              {t('about.support.supportBtn')}
             </Button>
             <Button
               variant="outline"
@@ -180,6 +192,42 @@ export function AboutContent() {
           {t('about.support.copiedHint')}
         </div>
       )}
+
+      <Dialog open={showPaymentModal} onOpenChange={setShowPaymentModal}>
+        <DialogContent className="max-w-2xl border-2 border-border">
+          <DialogHeader>
+            <DialogTitle id="payment-modal-title" className="text-xl sm:text-2xl">
+              {t('about.support.paymentModalTitle')}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 sm:gap-8">
+            {PAYMENT_QR.map(({ key, src }) => (
+              <div
+                key={key}
+                className="flex flex-col items-center gap-3"
+              >
+                <span className="text-base font-semibold text-foreground">
+                  {t(`about.support.${key}`)}
+                </span>
+                <img
+                  src={src}
+                  alt={t(`about.support.${key}`)}
+                  className="h-48 w-48 max-w-full rounded-lg border-2 border-border object-contain sm:h-52 sm:w-52"
+                />
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowPaymentModal(false)}
+              className="w-full"
+            >
+              {t('about.support.paymentModalClose')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }
