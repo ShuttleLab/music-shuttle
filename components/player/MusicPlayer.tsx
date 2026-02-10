@@ -10,7 +10,9 @@ import {
   useAudioPlayer,
   useAudioCache,
 } from '@/lib/hooks'
+import { useI18n } from '@/lib/i18n'
 import { swapAudioSource, revokeBlobUrl, formatTime, calculateProgress } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 
 /**
  * MusicPlayer 组件
@@ -50,6 +52,7 @@ export default function MusicPlayer() {
 
   const { prefetchFullAudio, clearPrefetchCache } = useAudioPrefetch()
   const { getCachedAudio } = useAudioCache()
+  const { t } = useI18n()
 
   // ========== 内部状态 ==========
   const currentBlobUrlRef = useRef<string | null>(null)
@@ -385,58 +388,57 @@ export default function MusicPlayer() {
 
   // ========== 渲染 ==========
 
-  return (
-    <div className="h-screen bg-gradient-to-b from-slate-900 to-slate-800 text-white flex flex-col">
-      {/* 主容器 */}
-      <div className="w-full max-w-2xl mx-auto flex flex-col h-full px-4 box-border">
-        {/* 顶部标题 */}
-        <header className="flex items-center justify-between gap-3 my-6 flex-wrap">
-          <div className="flex items-center gap-3">
-            <ListMusic className="w-8 h-8" />
-            <h1 className="text-2xl font-bold">音乐穿梭机</h1>
-          </div>
-          <div className="text-sm text-gray-400">已加载 {tracks.length} 首</div>
-        </header>
+  const loadedCountText = t('player.loadedCount').replace('{count}', String(tracks.length))
 
-        {/* 搜索框 */}
+  return (
+    <div className="min-h-[calc(100vh-8rem)] flex flex-col bg-background text-foreground">
+      <div className="w-full max-w-2xl mx-auto flex flex-col flex-1 px-4 py-6 box-border">
+        {/* <header className="flex items-center justify-between gap-3 mb-6 flex-wrap">
+          <div className="flex items-center gap-3">
+            <ListMusic className="w-8 h-8 text-primary" />
+            <h1 className="text-2xl font-bold text-foreground">{t('player.title')}</h1>
+          </div>
+          <div className="text-sm text-muted-foreground">{loadedCountText}</div>
+        </header> */}
+
         <div className="mb-6 relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
             onChange={e => handleSearchChange(e.target.value)}
-            placeholder="搜索音乐名..."
-            className="w-full pl-12 pr-4 py-3 rounded-2xl bg-white/10 text-white placeholder-gray-400 border border-white/20 outline-none focus:border-white/40 transition-colors"
+            placeholder={t('player.searchPlaceholder')}
+            className="w-full pl-12 pr-4 py-3 rounded-xl bg-muted/80 text-foreground placeholder-muted-foreground border-2 border-border outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-colors"
           />
         </div>
 
-        {/* 音乐列表 */}
-        <main className="flex-1 bg-white/5 rounded-lg p-3 overflow-y-auto mb-56">
+        <main className="flex-1 rounded-xl border-2 border-border bg-card p-3 overflow-y-auto mb-52">
           {loading ? (
-            <div className="text-center py-8 text-gray-400">加载中...</div>
+            <div className="text-center py-8 text-muted-foreground">{t('player.loading')}</div>
           ) : filteredTracks.length === 0 ? (
-            <div className="text-center py-8 text-gray-400">
-              {tracks.length === 0 ? '未找到音乐，请检查 R2 配置' : '没有找到音乐'}
+            <div className="text-center py-8 text-muted-foreground">
+              {tracks.length === 0 ? t('player.noTracks') : t('player.noSearchResults')}
             </div>
           ) : (
             <ul className="space-y-1">
               {filteredTracks.map((track, index) => {
                 const isCurrentTrack =
-                  currentTrackIndex === tracks.findIndex(t => t.key === track.key)
+                  currentTrackIndex === tracks.findIndex(tr => tr.key === track.key)
                 const fileName = getFileName(track.key)
 
                 return (
                   <li
                     key={track.key}
                     onClick={() => playTrack(index)}
-                    className={`flex items-center justify-between gap-3 p-3 rounded cursor-pointer transition-colors ${
+                    className={cn(
+                      'flex items-center justify-between gap-3 p-3 rounded-lg cursor-pointer transition-colors',
                       isCurrentTrack
-                        ? 'bg-white/20 text-white'
-                        : 'hover:bg-white/10 text-white'
-                    }`}
+                        ? 'bg-accent text-accent-foreground'
+                        : 'hover:bg-accent/50 text-foreground'
+                    )}
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <span className="text-sm font-bold text-gray-400 flex-shrink-0">
+                      <span className="text-sm font-bold text-muted-foreground flex-shrink-0">
                         {index + 1}.
                       </span>
                       <span className="text-sm truncate">{fileName}</span>
@@ -446,7 +448,7 @@ export default function MusicPlayer() {
                         {[0, 1, 2].map(i => (
                           <div
                             key={i}
-                            className="w-1 bg-purple-400 rounded animate-pulse"
+                            className="w-1 bg-primary rounded animate-pulse"
                             style={{
                               height: `${4 + i * 3}px`,
                               animationDelay: `${i * 100}ms`,
@@ -462,15 +464,46 @@ export default function MusicPlayer() {
           )}
         </main>
 
-        {/* 播放控制条 */}
-        <footer className="fixed bottom-0 right-0 left-0 bg-gradient-to-t from-slate-900 via-slate-900 to-transparent py-8 px-4">
+        <footer className="fixed bottom-0 right-0 left-0 bg-card/95 backdrop-blur border-t border-border py-6 px-4 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.1)]">
           <div className="max-w-2xl mx-auto px-4 flex flex-col gap-4">
-            {/* 播放按钮和随机模式按钮 */}
             <div className="flex items-center justify-between gap-3">
+              {/* <header className="flex items-center justify-between gap-3 mb-6 flex-wrap"> */}
+                <div className="flex items-center gap-3">
+                  <ListMusic className="w-8 h-8 text-primary" />
+                  {/* <h1 className="text-2xl font-bold text-foreground">{t('player.title')}</h1> */}
+                </div>
+                <div className="text-sm text-muted-foreground">{loadedCountText}</div>
+              {/* </header> */}
+              {/* <button
+                onClick={togglePlay}
+                className="w-12 h-12 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 flex items-center justify-center transition-colors flex-shrink-0 shadow-md"
+                aria-label={isPlaying ? t('player.pauseAria') : t('player.playAria')}
+              >
+                {isPlaying ? (
+                  <Pause className="w-6 h-6" />
+                ) : (
+                  <Play className="w-6 h-6 ml-0.5" />
+                )}
+              </button> */}
+
+              <button
+                onClick={handleToggleRandom}
+                className={cn(
+                  'flex-1 px-6 py-3 rounded-lg flex items-center justify-center gap-2 font-bold transition-all text-sm text-white',
+                  randomMode
+                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500'
+                    : 'bg-gradient-to-r from-primary to-primary/80'
+                )}
+              >
+                <Shuffle className="w-5 h-5 flex-shrink-0" />
+                <span className="truncate">
+                  {randomMode ? t('player.shuffleOn') : t('player.shuffle')}
+                </span>
+              </button>
               <button
                 onClick={togglePlay}
-                className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors flex-shrink-0"
-                aria-label={isPlaying ? '暂停' : '播放'}
+                className="w-12 h-12 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 flex items-center justify-center transition-colors flex-shrink-0 shadow-md"
+                aria-label={isPlaying ? t('player.pauseAria') : t('player.playAria')}
               >
                 {isPlaying ? (
                   <Pause className="w-6 h-6" />
@@ -478,32 +511,15 @@ export default function MusicPlayer() {
                   <Play className="w-6 h-6 ml-0.5" />
                 )}
               </button>
-
-              <button
-                onClick={handleToggleRandom}
-                className={`flex-1 px-6 py-3 rounded-lg flex items-center justify-center gap-2 text-white font-bold transition-all text-sm ${
-                  randomMode
-                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500'
-                    : 'bg-gradient-to-r from-purple-500 to-pink-500'
-                }`}
-              >
-                <Shuffle className="w-5 h-5 flex-shrink-0" />
-                <span className="truncate">
-                  {randomMode ? '随机中' : '随机播放'}
-                </span>
-              </button>
             </div>
 
-            {/* 现在播放信息和进度条 */}
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 flex flex-col gap-3">
-              {/* 歌曲名 */}
-              <div className="text-center text-sm font-semibold truncate">
+            <div className="rounded-xl border-2 border-border bg-muted/50 p-4 flex flex-col gap-3">
+              <div className="text-center text-sm font-semibold truncate text-foreground">
                 {currentTrackIndex !== null && tracks[currentTrackIndex]
                   ? getFileName(tracks[currentTrackIndex].key)
-                  : '未选择'}
+                  : t('player.notSelected')}
               </div>
 
-              {/* 进度条 */}
               <div>
                 <input
                   type="range"
@@ -512,12 +528,11 @@ export default function MusicPlayer() {
                   step="0.1"
                   value={calculateProgress(currentTime, duration)}
                   onChange={handleProgressChange}
-                  className="w-full h-1.5 bg-gray-600 rounded-full appearance-none cursor-pointer accent-purple-500"
+                  className="w-full h-1.5 bg-muted rounded-full appearance-none cursor-pointer accent-primary"
                 />
               </div>
 
-              {/* 时间显示 */}
-              <div className="flex justify-between text-xs text-gray-300">
+              <div className="flex justify-between text-xs text-muted-foreground">
                 <span>{formatTime(currentTime)}</span>
                 <span>{formatTime(duration)}</span>
               </div>
@@ -526,12 +541,7 @@ export default function MusicPlayer() {
         </footer>
       </div>
 
-      {/* 音频元素 */}
-      <audio
-        ref={audioRef}
-        preload="auto"
-        crossOrigin="anonymous"
-      />
+      <audio ref={audioRef} preload="auto" crossOrigin="anonymous" />
     </div>
   )
 }
